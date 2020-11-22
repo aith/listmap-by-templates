@@ -37,34 +37,32 @@ class listmap {
                link (next_, prev_), value(value_){}
       };
       node* anchor() { return static_cast<node*> (&anchor_); }
-      // ?? creates an anchor boundary tag
-      // The list itself
       link anchor_ {anchor(), anchor()};
    public:
-      class iterator;
-      // default ctor
-      listmap(){};
-      // copy ctor
-      listmap (const listmap&);
-      // copy assignment
-      listmap& operator= (const listmap&);
-      // dtor
-      ~listmap();
-      // insert a value type and return an iterator to that
-      iterator insert (const value_type&);
-      // update a new node's neighor pointers
-      void insertBounds(node* newnode);
-      void removeBounds(node* newnode);
-      // find a key type and return iterator to it
-      iterator find (const key_type&);
-      // erase an iterator and return iterator following it
-      iterator erase (iterator position);
-      iterator begin() { return anchor()->next; }
-      iterator end() { return anchor(); }
-      void print(iterator position); 
-      // checks if list itself (the anchor) is empty
-      bool empty() const { return anchor_.next == &anchor_; }
-      operator bool() const { return not empty(); }
+         class iterator;
+         // default ctor
+         listmap(){};
+         // copy ctor
+         listmap (const listmap&);
+         // copy assignment
+         listmap& operator= (const listmap&);
+         // dtor
+         ~listmap();
+         // insert a value type and return an iterator to that
+         iterator insert (const value_type&);
+         // update a new node's neighor pointers
+         void insertBounds(node* newnode);
+         void removeBounds(node* newnode);
+         // find a key type and return iterator to it
+         iterator find (const key_type&);
+         // erase an iterator and return iterator following it
+         iterator erase (iterator position);
+         iterator begin() { return anchor()->next; }
+         iterator end() { return anchor(); }
+         void print(iterator position); 
+         // checks if list itself (the anchor) is empty
+         bool empty() const { return anchor_.next == &anchor_; }
+         operator bool() const { return not empty(); }
 };
 
 

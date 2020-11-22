@@ -45,13 +45,6 @@ int main (int argc, char** argv) {
    scan_options (argc, argv);
 
    str_str_map list;
-   // // starting at the optind, while argp(ointer) is not at end
-   // for (char** argp = &argv[optind]; argp != &argv[argc]; ++argp) {
-   //    // create pair with the arg, and the point in the range?
-   //    str_str_pair pair (*argp, to_string<int> (argp - argv)); 
-   //    cout << "Before insert: " << pair << endl;
-   //    test.insert (pair);
-   // }
    regex comment_regex {R"(^\s*(#.*)?$)"};
    regex key_value_regex {R"(^\s*(.*?)\s*=\s*(.*?)\s*$)"};
    regex trimmed_regex {R"(^\s*([^=]+?)\s*$)"};
@@ -96,7 +89,7 @@ int main (int argc, char** argv) {
          else {
             print_prompt(count);
             str_str_pair newpair {result[1], result[2]};
-            auto position = list.insert(newpair);
+            auto position = list.insert({result[1], result[2]});
             list.print(position);
             list.print(position);
          }
@@ -109,16 +102,6 @@ int main (int argc, char** argv) {
 
       count++;
    }
-
-   cout << list.empty() << endl;
-   for (str_str_map::iterator itor = list.begin();
-        itor != list.end(); ++itor) {
-      // do something for every node in str_str_map
-      cout << "During iteration: " << *itor << endl; 
-   }
-
-   // str_str_map::iterator itor = list.begin();
-   // list.erase (itor);
 
    cout << "EXIT_SUCCESS" << endl;
    return EXIT_SUCCESS;
