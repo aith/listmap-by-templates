@@ -22,8 +22,6 @@ const string cin_name = "-";
 void scan_options (int argc, char** argv) {
    opterr = 0;
    for (;;) {
-      // getopt() takes a string of possible flags. ":" indicates
-      //   that char must be followed by another char
       int option = getopt (argc, argv, "@:");  
       if (option == EOF) break;
       switch (option) {
@@ -52,12 +50,12 @@ int main (int argc, char** argv) {
    regex key_value_regex {R"(^\s*(.*?)\s*=\s*(.*?)\s*$)"};
    regex trimmed_regex {R"(^\s*([^=]+?)\s*$)"};
    int count = 1;
-   vector<string> filenames (&argv[1], &argv[argc]);
-   if(filenames.size() == 0) filenames.push_back(cin_name);
 
-   for (int it = 1; it < argc; ++it) {
+   bool isCin = false;
+   if (argc < 2) isCin = true;
+
+   for (int it = 1 - isCin; it < argc; ++it) {
       string filename = argv[it];
-      bool isCin = false;
       ifstream infile (filename) ;
       if (filename == cin_name) isCin = true;
       // getline (filestr)
@@ -80,10 +78,7 @@ int main (int argc, char** argv) {
                break;
             }
          }
-
          smatch result;
-         // create one listmap
-
          if (regex_search (line, result, comment_regex)) {
             print_prompt(count); cout << result[1] << endl;
             continue;
@@ -98,7 +93,8 @@ int main (int argc, char** argv) {
                }
                else
                {
-                  print_prompt(count); cout << result[1] << " =" << endl;
+                  print_prompt(count);
+                  cout << result[1] << " =" << endl;
                   auto iterator = list.find(result[1]);
                   if(iterator != list.end()) {
                      list.erase(iterator);
@@ -121,7 +117,6 @@ int main (int argc, char** argv) {
                list.print(position);
             }
          } else if (regex_search (line, result, trimmed_regex)) {
-            // Print individual keys
             list.print(list.find(result[1]));
          } else {
             assert (false and "This can not happen.");
@@ -129,6 +124,7 @@ int main (int argc, char** argv) {
 
          count++;
       }
+      isCin = false;
    }
 
    if (status == 0) cout << "EXIT_SUCCESS" << endl;
