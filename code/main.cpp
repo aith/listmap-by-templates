@@ -55,7 +55,9 @@ int main (int argc, char** argv) {
    if (argc < 2) isCin = true;
 
    for (int it = 1 - isCin; it < argc; ++it) {
-      string filename = argv[it];
+      string filename;
+      if (!isCin) filename = argv[it];
+      else filename = "-";
       ifstream infile (filename) ;
       if (filename == cin_name) isCin = true;
       // getline (filestr)
