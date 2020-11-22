@@ -23,16 +23,12 @@ class listmap {
       less_t less;
       struct node;
       struct link {
-         // boundary tag
          node* next{};
          node* prev{};
-         // link ctor taking pointers
          link (node* next_, node* prev_): next(next_), prev(prev_){}
       };
       struct node: link {
          value_type value{};
-         // node ctor (leveragng the link ctor) that takes the 
-         // boundary tag pointers and a value.
          node (node* next_, node* prev_, const value_type& value_):
                link (next_, prev_), value(value_){}
       };
@@ -40,22 +36,14 @@ class listmap {
       link anchor_ {anchor(), anchor()};
    public:
          class iterator;
-         // default ctor
          listmap(){};
-         // copy ctor
          listmap (const listmap&);
-         // copy assignment
          listmap& operator= (const listmap&);
-         // dtor
          ~listmap();
-         // insert a value type and return an iterator to that
          iterator insert (const value_type&);
-         // update a new node's neighor pointers
          void insertBounds(node* newnode);
          void removeBounds(node* newnode);
-         // find a key type and return iterator to it
          iterator find (const key_type&);
-         // erase an iterator and return iterator following it
          iterator erase (iterator position);
          iterator begin() { return anchor()->next; }
          iterator end() { return anchor(); }
@@ -69,7 +57,6 @@ class listmap {
 template <typename key_t, typename mapped_t, class less_t>
 class listmap<key_t,mapped_t,less_t>::iterator {
    private:
-      // let the list map access all of the iterator's elements
       friend class listmap<key_t,mapped_t,less_t>; 
       /* where
             the actual pointer object, the address it points to.
