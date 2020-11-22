@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <unistd.h>
 #include <regex>
@@ -16,6 +17,7 @@ using namespace std;
 
 using str_str_map = listmap<string,string>;
 using str_str_pair = str_str_map::value_type;
+const string cin_name = "-";
 
 void scan_options (int argc, char** argv) {
    opterr = 0;
@@ -42,6 +44,7 @@ void print_prompt (int count) {
 
 int main (int argc, char** argv) {
    sys_info::execname (argv[0]);
+   int status = 0;
    scan_options (argc, argv);
 
    str_str_map list;
@@ -49,61 +52,87 @@ int main (int argc, char** argv) {
    regex key_value_regex {R"(^\s*(.*?)\s*=\s*(.*?)\s*$)"};
    regex trimmed_regex {R"(^\s*([^=]+?)\s*$)"};
    int count = 1;
+   vector<string> filenames (&argv[1], &argv[argc]);
+   if(filenames.size() == 0) filenames.push_back(cin_name);
 
-   for(;;) {
-      string line;
-      getline(cin, line);
-      if (cin.eof()) break;
-      smatch result;
-      // create one listmap
-
-      if (regex_search (line, result, comment_regex)) {
-         print_prompt(count); cout << result[1] << endl;
-         continue;
-      }
-      if (regex_search (line, result, key_value_regex)) {
-         if (result[2] == "") {
-            if (result[1] == "") {
-               print_prompt(count); cout << "=" << endl;
-               for(auto itr = list.begin(); itr != list.end(); ++itr) {
-                  list.print(itr);
-               }
-            }
-            else
-            {
-               print_prompt(count); cout << result[1] << " =" << endl;
-               auto iterator = list.find(result[1]);
-               if(iterator != list.end()) {
-                  list.erase(iterator);
-               }
-            }
+   for (int it = 1; it < argc; ++it) {
+      string filename = argv[it];
+      bool isCin = false;
+      ifstream infile (filename) ;
+      if (filename == cin_name) isCin = true;
+      // getline (filestr)
+      for(;;) {
+         string line;
+         if (!isCin && infile.fail()) {
+            status = 1;
+            cerr << "keyvalue" << ": " << filename << ": "
+                 << strerror (errno) << endl;
+            break;
          }
-         else if (result[1] == "") {
-            print_prompt(count); cout << "= " << result[2] << endl;
-            for(auto itr = list.begin(); itr != list.end(); ++itr) {
-               if ((*itr).second == result[2]) {
-                  list.print(itr);
-               }
-            }
+         if (isCin) {
+            getline(cin, line);
+            if (cin.eof()) break;
          }
          else {
-            print_prompt(count);
-            str_str_pair newpair {result[1], result[2]};
-            auto position = list.insert({result[1], result[2]});
-            list.print(position);
-            list.print(position);
+            getline(infile, line);
+            if (infile.eof()) {
+               infile.close();
+               break;
+            }
          }
-      } else if (regex_search (line, result, trimmed_regex)) {
-         // Print individual keys
-         list.print(list.find(result[1]));
-      } else {
-         assert (false and "This can not happen.");
-      }
 
-      count++;
+         smatch result;
+         // create one listmap
+
+         if (regex_search (line, result, comment_regex)) {
+            print_prompt(count); cout << result[1] << endl;
+            continue;
+         }
+         if (regex_search (line, result, key_value_regex)) {
+            if (result[2] == "") {
+               if (result[1] == "") {
+                  print_prompt(count); cout << "=" << endl;
+                  for(auto itr = list.begin(); itr != list.end(); ++itr) {
+                     list.print(itr);
+                  }
+               }
+               else
+               {
+                  print_prompt(count); cout << result[1] << " =" << endl;
+                  auto iterator = list.find(result[1]);
+                  if(iterator != list.end()) {
+                     list.erase(iterator);
+                  }
+               }
+            }
+            else if (result[1] == "") {
+               print_prompt(count); cout << "= " << result[2] << endl;
+               for(auto itr = list.begin(); itr != list.end(); ++itr) {
+                  if ((*itr).second == result[2]) {
+                     list.print(itr);
+                  }
+               }
+            }
+            else {
+               print_prompt(count);
+               str_str_pair newpair {result[1], result[2]};
+               auto position = list.insert({result[1], result[2]});
+               list.print(position);
+               list.print(position);
+            }
+         } else if (regex_search (line, result, trimmed_regex)) {
+            // Print individual keys
+            list.print(list.find(result[1]));
+         } else {
+            assert (false and "This can not happen.");
+         }
+
+         count++;
+      }
    }
 
-   cout << "EXIT_SUCCESS" << endl;
-   return EXIT_SUCCESS;
+   if (status == 0) cout << "EXIT_SUCCESS" << endl;
+   else cout << "EXIT_FAILURE" << endl;
+   return status;
 }
 
