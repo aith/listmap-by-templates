@@ -36,6 +36,10 @@ void scan_options (int argc, char** argv) {
    }
 }
 
+void print_prompt (int count) {
+   cout << "-: " << count << ": ";
+}
+
 int main (int argc, char** argv) {
    sys_info::execname (argv[0]);
    scan_options (argc, argv);
@@ -51,6 +55,7 @@ int main (int argc, char** argv) {
    regex comment_regex {R"(^\s*(#.*)?$)"};
    regex key_value_regex {R"(^\s*(.*?)\s*=\s*(.*?)\s*$)"};
    regex trimmed_regex {R"(^\s*([^=]+?)\s*$)"};
+   int count = 1;
 
    for(;;) {
       string line;
@@ -60,17 +65,20 @@ int main (int argc, char** argv) {
       // create one listmap
 
       if (regex_search (line, result, comment_regex)) {
+         print_prompt(count); cout << result[1] << endl;
          continue;
       }
       if (regex_search (line, result, key_value_regex)) {
          if (result[2] == "") {
             if (result[1] == "") {
+               print_prompt(count); cout << "=" << endl;
                for(auto itr = list.begin(); itr != list.end(); ++itr) {
                   list.print(itr);
                }
             }
             else
             {
+               print_prompt(count); cout << result[1] << " =" << endl;
                auto iterator = list.find(result[1]);
                if(iterator != list.end()) {
                   list.erase(iterator);
@@ -78,15 +86,19 @@ int main (int argc, char** argv) {
             }
          }
          else if (result[1] == "") {
-               for(auto itr = list.begin(); itr != list.end(); ++itr) {
-                  if ((*itr).second == result[2]) {
-                    list.print(itr);
-                  }
+            print_prompt(count); cout << "= " << result[2] << endl;
+            for(auto itr = list.begin(); itr != list.end(); ++itr) {
+               if ((*itr).second == result[2]) {
+                  list.print(itr);
                }
+            }
          }
          else {
+            print_prompt(count);
             str_str_pair newpair {result[1], result[2]};
-            list.print(list.insert(newpair));
+            auto position = list.insert(newpair);
+            list.print(position);
+            list.print(position);
          }
       } else if (regex_search (line, result, trimmed_regex)) {
          // Print individual keys
@@ -94,6 +106,8 @@ int main (int argc, char** argv) {
       } else {
          assert (false and "This can not happen.");
       }
+
+      count++;
    }
 
    cout << list.empty() << endl;
