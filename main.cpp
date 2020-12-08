@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <regex>
 #include <cassert>
+#include <cstring>
 
 using namespace std;
 
@@ -119,7 +120,9 @@ int main (int argc, char** argv) {
                list.print(position);
             }
          } else if (regex_search (line, result, trimmed_regex)) {
-            list.print(list.find(result[1]));
+            auto item = list.find(result[1]);
+            if (item == list.end()) cout << "key: not found" << endl;
+            else list.print(item);
          } else {
             assert (false and "This can not happen.");
          }
